@@ -1,0 +1,29 @@
+name: security
+
+# Quand lancer le workflow
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Droits minimaux du jeton GitHub : lecture seule du code
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secrets (gitleaks)
+    runs-on: ubuntu-24.04        # version épinglée plutôt que ubuntu-latest
+    steps:
+      # 1. Récupérer le code. Le runner est vide au départ.
+      - name: Checkout avec tout l'historique
+        uses: actions/checkout@<SHA_COMPLET>   # vX.Y.Z
+        with:
+          fetch-depth: 0         # par défaut, seul le dernier commit est récupéré
+          persist-credentials: false   # ne pas laisser le jeton dans .git/config
+
+      # 2. Ta commande locale, adaptée au runner
+      - name: Scanner l'historique avec gitleaks
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/repo" \
+            zricethezav/gitleaks:<VERSION> git /repo --verbose <OPTION_DE_MASQUAGE>
