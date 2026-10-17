@@ -13,3 +13,6 @@ __pycache__/
 
 # Output Trivy image 
 trivy-*.txt
+
+# output semgrep
+semgrep.json

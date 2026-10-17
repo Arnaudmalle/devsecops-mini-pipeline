@@ -27,3 +27,29 @@ jobs:
         run: |
           docker run --rm -v "${{ github.workspace }}:/repo" \
             zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git /repo --verbose --redact
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # pas de fetch-depth : le SAST analyse le code actuel, pas l'historique
+
+      - name: Scanner le code avec Semgrep
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/src" \
+            semgrep/semgrep:1.181.0-nonroot@sha256:4c37ae86cb02b5536f8c9ff6aabbc991944117e4678609e14e0f19a2bd7ea879 \
+            semgrep scan --config p/python \
+            --config r/python.lang.security.audit.formatted-sql-query.formatted-sql-query \
+            --metrics=off --json-output=/src/semgrep.json
+
+      - name: Appliquer la politique de blocage (ERROR + règles choisies)
+        run: |
+          BLOQUANTS=$(jq '[.results[]
+            | select(.extra.severity == "ERROR"
+                  or .check_id == "python.lang.security.audit.formatted-sql-query.formatted-sql-query")]
+            | length' semgrep.json)
+          echo "Résultats bloquants : $BLOQUANTS"
+          test "$BLOQUANTS" -eq 0
