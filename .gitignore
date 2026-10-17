@@ -7,3 +7,9 @@ __pycache__/
 # Rapports de scan
 *.sarif
 *-report.json
+
+# Archives
+*.tar
+
+# Output Trivy image 
+trivy-*.txt
