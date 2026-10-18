@@ -1,0 +1,8 @@
+# On échoue qu'à partir du niveau "error"
+failure-threshold: error
+
+# On reclasse en "error" les règles qu'on juge critiques
+override:
+  error:
+    - DL3007   # image de base en "latest"
+    - DL3002   # dernier USER = root
