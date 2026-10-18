@@ -44,8 +44,11 @@ def health():
 
 @app.get("/users/{username}")
 def get_user(username: str):
-    # VULN-2 : injection SQL, entrée utilisateur interpolée dans la requête (f-string)
-    rows = db.execute(f"SELECT id, username, email FROM users WHERE username = '{username}'").fetchall()
+    # VULN-2 fixed: passage à une requête paramétrée
+    rows = db.execute(
+        "SELECT id, username, email FROM users WHERE username = ?",
+        (username,),
+    ).fetchall()
     if not rows:
         raise HTTPException(status_code=404, detail="user not found")
     return [{"id": r[0], "username": r[1], "email": r[2]} for r in rows]
