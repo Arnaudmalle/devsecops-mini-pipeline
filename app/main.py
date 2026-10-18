@@ -2,15 +2,17 @@
 
 Ne jamais déployer. Toutes les données et tous les secrets sont factices.
 """
-
+import os
 import sqlite3
 from contextlib import asynccontextmanager
 
 import jwt
 from fastapi import FastAPI, Header, HTTPException
 
-# VULN-1 : clé API en dur dans le code source (factice)
-api_key = "vOUKpCQBotxnReg2akR0zhuakUH3BGKDIFH6LA81"
+# VULN-1 fixed : la clé n'est plus dans le code
+api_key = os.environ.get("API_KEY")
+if not api_key:
+    raise RuntimeError("La variable d'environnement API_KEY doit être définie")
 
 USERS = [
     ("alice", "alice@example.invalid"),
