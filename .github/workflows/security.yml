@@ -27,6 +27,7 @@ jobs:
         run: |
           docker run --rm -v "${{ github.workspace }}:/repo" \
             zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git /repo --verbose --redact
+  
   sast:
     name: SAST (Semgrep)
     runs-on: ubuntu-24.04
@@ -53,6 +54,7 @@ jobs:
             | length' semgrep.json)
           echo "Résultats bloquants : $BLOQUANTS"
           test "$BLOQUANTS" -eq 0
+  
   sca:
     name: SCA (Trivy fs)
     runs-on: ubuntu-24.04
@@ -68,3 +70,18 @@ jobs:
           docker run --rm -v "${{ github.workspace }}:/project:ro" \
           aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
           fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 /project
+  
+  dockerfile:
+    name: Lint Dockerfile (Hadolint)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Analyser le Dockerfile avec Hadolint
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work:ro" \
+            hadolint/hadolint:v2.15.1-debian@sha256:9a3944b7fddcb947d1ffd90829ac1a6e5c30479223358f249d8b96c7d0019e27 \
+            hadolint --config /work/.hadolint.yml /work/Dockerfile
