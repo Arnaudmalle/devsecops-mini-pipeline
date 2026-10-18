@@ -85,3 +85,22 @@ jobs:
           docker run --rm -v "${{ github.workspace }}:/work:ro" \
             hadolint/hadolint:v2.15.1-debian@sha256:9a3944b7fddcb947d1ffd90829ac1a6e5c30479223358f249d8b96c7d0019e27 \
             hadolint --config /work/.hadolint.yml /work/Dockerfile
+  
+  image:
+    name: Scan image (Trivy image)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Construire l'image
+        run: docker build -t devsecops-mini:${{ github.sha }} .
+
+      - name: Scanner l'image avec Trivy
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
+            image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 \
+            devsecops-mini:${{ github.sha }}
