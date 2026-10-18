@@ -1,8 +1,8 @@
 # Dépendances directes
 fastapi==0.143.2
 uvicorn==0.54.0
-# VULN-3 : version obsolète, GHSA-ffqj-6fqr-9h24 / CVE-2022-29217 (HIGH, CVSS 3.1 7.4), corrigée en 2.4.0
-PyJWT==2.3.0
+# VULN-3 fixed : passer en 2.14.0
+PyJWT==2.14.0
 
 # Dépendances transitives (bloquées pour un build reproductible)
 annotated-doc==0.0.5
